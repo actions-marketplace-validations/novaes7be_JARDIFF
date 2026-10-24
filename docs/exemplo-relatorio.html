@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>jardiff — relatório</title>
+<style>
+:root{
+  --bg:#f6f7f9;--surface:#fff;--text:#1c2128;--muted:#6b7480;--border:#dfe3e8;--accent:#0969da;
+  --added:#1a7f37;--added-bg:#dafbe1;--removed:#cf222e;--removed-bg:#ffebe9;
+  --changed:#9a6700;--changed-bg:#fff8c5;--cosmetic:#6e7781;--cosmetic-bg:#eef0f2;
+  --risk-alto:#cf222e;--risk-medio:#bf8700;--risk-nenhum:#1a7f37;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--radius:10px;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--heat-l:68%;
+}
+[data-theme=dark]{
+  --bg:#0d1117;--surface:#161b22;--text:#e6edf3;--muted:#8b949e;--border:#30363d;--accent:#58a6ff;
+  --added:#3fb950;--added-bg:#12261e;--removed:#f85149;--removed-bg:#2d1315;
+  --changed:#d29922;--changed-bg:#2b2111;--cosmetic:#8b949e;--cosmetic-bg:#21262d;
+  --risk-alto:#f85149;--risk-medio:#d29922;--risk-nenhum:#3fb950;--heat-l:32%;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;align-items:center;gap:var(--s4);padding:var(--s4) var(--s5);border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
+header h1{font-size:18px;margin:0}
+header .jars{font-family:var(--mono);color:var(--muted);flex:1}
+.btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--s2) var(--s3);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+main{padding:var(--s5);max-width:1500px;margin:0 auto;display:grid;gap:var(--s5)}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 var(--s2)}
+.grid{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--c,var(--border));border-radius:var(--radius);padding:var(--s3) var(--s4);text-align:left;cursor:default}
+button.card{cursor:pointer}button.card:hover,.card.on{border-color:var(--c,var(--accent));box-shadow:0 0 0 1px var(--c,var(--accent))}
+.card b{display:block;font-size:26px;line-height:1.1;color:var(--c,var(--text))}
+.card span{color:var(--muted);font-size:12px}
+.heat{display:grid;gap:var(--s2);grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.tile{border:1px solid var(--border);border-radius:var(--radius);padding:var(--s2) var(--s3);text-align:left;cursor:pointer;background:var(--bg-t,var(--surface));min-height:54px}
+.tile small{display:block;color:var(--muted);font-family:var(--mono)}
+.tile:hover,.tile.sel{border-color:var(--accent)}
+.toolbar{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--s2) var(--s3)}
+.toolbar input{flex:1;min-width:200px}
+.count{color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:var(--s5);align-items:start}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:var(--s3)}
+.tree details{margin-left:var(--s3)}.tree>details,.tree>.leafs{margin-left:0}
+.tree summary{cursor:pointer;font-family:var(--mono);padding:var(--s1) 0;color:var(--muted)}
+.node{display:flex;align-items:center;gap:var(--s2);width:100%;background:none;border:0;border-radius:6px;padding:var(--s1) var(--s2);cursor:pointer;text-align:left;font-family:var(--mono)}
+.node:hover{background:var(--cosmetic-bg)}.node.sel{background:var(--cosmetic-bg);box-shadow:inset 3px 0 var(--accent)}
+.node .n{margin-left:auto;color:var(--muted);font-size:12px}
+.ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;font-weight:700;font-size:12px;flex:none}
+.ico.added{color:var(--added);background:var(--added-bg)}.ico.removed{color:var(--removed);background:var(--removed-bg)}
+.ico.changed{color:var(--changed);background:var(--changed-bg)}.ico.cosmetic{color:var(--cosmetic);background:var(--cosmetic-bg)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.badge{display:inline-block;border-radius:999px;padding:1px 10px;font-size:12px;background:var(--cosmetic-bg);color:var(--text);border:1px solid var(--border)}
+.badge.k-LOGIC,.badge.k-CONDITION{background:var(--changed-bg);color:var(--changed)}
+.badge.k-CALL{background:var(--added-bg);color:var(--added)}
+.badge.k-METHOD_ADDED{background:var(--added-bg);color:var(--added)}.badge.k-METHOD_REMOVED{background:var(--removed-bg);color:var(--removed)}
+.badge.r-alto{background:var(--removed-bg);color:var(--risk-alto)}.badge.r-medio{background:var(--changed-bg);color:var(--risk-medio)}
+.member{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:var(--s4);overflow:hidden}
+.member>header{padding:var(--s3);gap:var(--s2);border:0;border-bottom:1px solid var(--border);background:var(--bg)}
+.member>header code{font-weight:600;margin-right:auto;word-break:break-all}
+.wrap{overflow-x:auto}
+table.diff{border-collapse:collapse;width:100%;font:12px/1.55 var(--mono)}
+.diff td{padding:0 var(--s2);vertical-align:top}
+.diff td.ln{width:40px;text-align:right;color:var(--muted);user-select:none;border-right:1px solid var(--border)}
+.diff td.code{white-space:pre;width:50%}
+.diff td.del{background:var(--removed-bg)}.diff td.add{background:var(--added-bg)}.diff td.empty{background:var(--cosmetic-bg)}
+.muted{color:var(--muted)}
+footer{padding:var(--s5);text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>jardiff</h1>
+  <div class="jars" id="jars"></div>
+  <button class="btn" id="theme" aria-label="Alternar modo escuro" title="Modo escuro">☾</button>
+</header>
+<main>
+  <section><h2>Classes</h2><div class="grid" id="s-classes"></div></section>
+  <section><h2>Tipos de mudança <span class="muted">(clique para filtrar)</span></h2><div class="grid" id="s-kinds"></div></section>
+  <section><h2>Risco novo na v2 <span class="muted">(clique para filtrar)</span></h2><div class="grid" id="s-risk"></div></section>
+  <section><h2>Mapa de calor — classes mais alteradas</h2><div class="heat" id="heat"></div></section>
+  <section>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Buscar classe ou método…" aria-label="Buscar classe ou método">
+      <select id="f-risk" aria-label="Filtrar por risco"><option value="">Risco: todos</option><option value="alto">Alto</option><option value="medio">Médio</option><option value="nenhum">Nenhum</option></select>
+      <select id="f-kind" aria-label="Filtrar por tipo"></select>
+      <button class="btn" id="clear">Limpar</button>
+      <span class="count" id="count"></span>
+    </div>
+  </section>
+  <section class="cols">
+    <div class="panel tree" id="tree" aria-label="Árvore de pacotes e classes"></div>
+    <div id="detail"></div>
+  </section>
+</main>
+<footer id="foot"></footer>
+<script>
+const D = {"left":"v1.jar","right":"v2.jar","generated":"2026-10-23T22:59:07Z","summary":{"classes":{"added":1,"removed":0,"changed":3,"cosmetic":0},"entries":{"added":1,"removed":0,"changed":3},"kinds":{"LOGIC":3,"CALL":2,"CONDITION":1,"METHOD_ADDED":0,"METHOD_REMOVED":1,"COSMETIC":1},"risk":{"alto":1,"medio":1,"nenhum":2},"riskTags":{"REDE":1,"EXEC":0,"SERIALIZACAO":0,"REFLEXAO":1,"ARQUIVOS":0}},"meta":{"kinds":{"LOGIC":"lógica alterada","CALL":"chamada nova","CONDITION":"condição trocada","METHOD_ADDED":"método adicionado","METHOD_REMOVED":"método removido","COSMETIC":"cosmética (ignorada)"},"risks":{"REDE":"rede","EXEC":"exec","SERIALIZACAO":"serialização","REFLEXAO":"reflexão","ARQUIVOS":"acesso a arquivos"}},"entries":[{"path":"loja/Cupom.class","status":"ADDED"},{"path":"loja/Desconto.class","status":"CHANGED"},{"path":"loja/Frete.class","status":"CHANGED"},{"path":"loja/Pedido.class","status":"CHANGED"}],"classes":[{"name":"loja/Cupom","status":"ADDED","score":17,"risk":"nenhum","risks":[],"members":[{"name":"[classe]","kinds":[],"risk":"nenhum","risks":[],"diff":[{"op":"+","text":"access 0x0021"},{"op":"+","text":"super java/lang/Object"}]},{"name":"<init>(): void","kinds":[],"risk":"nenhum","risks":[],"diff":[{"op":"+","text":"access 0x0001"},{"op":"+","text":"ALOAD 0"},{"op":"+","text":"INVOKESPECIAL java/lang/Object.<init>()V"},{"op":"+","text":"RETURN"}]},{"name":"valido(java.lang.String): boolean","kinds":[],"risk":"nenhum","risks":[],"diff":[{"op":"+","text":"access 0x0009"},{"op":"+","text":"ALOAD 0"},{"op":"+","text":"IFNULL +7"},{"op":"+","text":"ALOAD 0"},{"op":"+","text":"LDC \"PROMO\""},{"op":"+","text":"INVOKEVIRTUAL java/lang/String.startsWith(Ljava/lang/String;)Z"},{"op":"+","text":"IFEQ +3"},{"op":"+","text":"ICONST_1"},{"op":"+","text":"GOTO +2"},{"op":"+","text":"ICONST_0"},{"op":"+","text":"IRETURN"}]}],"cosmetic":[]},{"name":"loja/Desconto","status":"CHANGED","score":6,"risk":"nenhum","risks":[],"members":[{"name":"calcular(double): double","kinds":["LOGIC","CONDITION"],"risk":"nenhum","risks":[],"diff":[{"op":" ","text":"access 0x0009"},{"op":" ","text":"DLOAD 0"},{"op":"-","text":"LDC 100.0"},{"op":"+","text":"LDC 200.0"},{"op":" ","text":"DCMPL"},{"op":"-","text":"IFLE +5"},{"op":"+","text":"IFLT +5"},{"op":" ","text":"DLOAD 0"},{"op":"-","text":"LDC 0.1"},{"op":"+","text":"LDC 0.15"},{"op":" ","text":"DMUL"},{"op":" ","text":"DRETURN"},{"op":" ","text":"DCONST_0"},{"op":" ","text":"DRETURN"}]}],"cosmetic":[]},{"name":"loja/Frete","status":"CHANGED","score":16,"risk":"alto","risks":["REDE"],"members":[{"name":"calcular(double): double","kinds":["LOGIC","CALL"],"risk":"alto","risks":["REDE"],"diff":[{"op":" ","text":"access 0x0009"},{"op":" ","text":"DLOAD 0"},{"op":" ","text":"LDC 300.0"},{"op":" ","text":"DCMPL"},{"op":" ","text":"IFLE +3"},{"op":" ","text":"DCONST_0"},{"op":" ","text":"DRETURN"},{"op":"+","text":"NEW java/net/URL"},{"op":"+","text":"DUP"},{"op":"+","text":"LDC \"https://api.exemplo.com/frete\""},{"op":"+","text":"INVOKESPECIAL java/net/URL.<init>(Ljava/lang/String;)V"},{"op":"+","text":"INVOKEVIRTUAL java/net/URL.openConnection()Ljava/net/URLConnection;"},{"op":"+","text":"CHECKCAST java/net/HttpURLConnection"},{"op":"+","text":"ASTORE 2"},{"op":"+","text":"ALOAD 2"},{"op":"+","text":"LDC \"GET\""},{"op":"+","text":"INVOKEVIRTUAL java/net/HttpURLConnection.setRequestMethod(Ljava/lang/String;)V"},{"op":"+","text":"ALOAD 2"},{"op":"+","text":"INVOKEVIRTUAL java/net/HttpURLConnection.getResponseCode()I"},{"op":"+","text":"POP"},{"op":"+","text":"GOTO +2"},{"op":"+","text":"ASTORE 2"},{"op":" ","text":"LDC 25.0"},{"op":" ","text":"DRETURN"},{"op":"+","text":"TRYCATCH java/lang/Exception 6..19 -> 20"}]}],"cosmetic":[]},{"name":"loja/Pedido","status":"CHANGED","score":34,"risk":"medio","risks":["REFLEXAO"],"members":[{"name":"total(): double","kinds":["LOGIC","CALL"],"risk":"medio","risks":["REFLEXAO"],"diff":[{"op":" ","text":"access 0x0001"},{"op":" ","text":"ALOAD 0"},{"op":" ","text":"INVOKEVIRTUAL loja/Pedido.subtotal()D"},{"op":" ","text":"DSTORE 1"},{"op":"+","text":"LDC \"loja.Desconto\""},{"op":"+","text":"INVOKESTATIC java/lang/Class.forName(Ljava/lang/String;)Ljava/lang/Class;"},{"op":"+","text":"LDC \"calcular\""},{"op":"+","text":"ICONST_1"},{"op":"+","text":"ANEWARRAY java/lang/Class"},{"op":"+","text":"DUP"},{"op":"+","text":"ICONST_0"},{"op":"+","text":"GETSTATIC java/lang/Double.TYPE:Ljava/lang/Class;"},{"op":"+","text":"AASTORE"},{"op":"+","text":"INVOKEVIRTUAL java/lang/Class.getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;"},{"op":"+","text":"ACONST_NULL"},{"op":"+","text":"ICONST_1"},{"op":"+","text":"ANEWARRAY java/lang/Object"},{"op":"+","text":"DUP"},{"op":"+","text":"ICONST_0"},{"op":" ","text":"DLOAD 1"},{"op":"+","text":"INVOKESTATIC java/lang/Double.valueOf(D)Ljava/lang/Double;"},{"op":"+","text":"AASTORE"},{"op":"+","text":"INVOKEVIRTUAL java/lang/reflect/Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"},{"op":"+","text":"CHECKCAST java/lang/Double"},{"op":"+","text":"INVOKEVIRTUAL java/lang/Double.doubleValue()D"},{"op":"+","text":"DSTORE 3"},{"op":"+","text":"GOTO +4"},{"op":"+","text":"ASTORE 5"},{"op":"+","text":"DCONST_0"},{"op":"+","text":"DSTORE 3"},{"op":" ","text":"DLOAD 1"},{"op":"-","text":"INVOKESTATIC loja/Desconto.calcular(D)D"},{"op":"+","text":"DLOAD 3"},{"op":" ","text":"DSUB"},{"op":" ","text":"DLOAD 1"},{"op":" ","text":"INVOKESTATIC loja/Frete.calcular(D)D"},{"op":" ","text":"DADD"},{"op":" ","text":"DRETURN"},{"op":"+","text":"TRYCATCH java/lang/Exception 3..25 -> 26"}]},{"name":"resumo(): java.lang.String","kinds":["METHOD_REMOVED"],"risk":"nenhum","risks":[],"diff":[{"op":"-","text":"access 0x0001"},{"op":"-","text":"ALOAD 0"},{"op":"-","text":"GETFIELD loja/Pedido.itens:Ljava/util/List;"},{"op":"-","text":"INVOKEINTERFACE java/util/List.size()I"},{"op":"-","text":"INVOKEDYNAMIC makeConcatWithConstants(I)Ljava/lang/String; bsm=java/lang/invoke/StringConcatFactory.makeConcatWithConstants args=[Pedido com \u0001 itens]"},{"op":"-","text":"ARETURN"}]}],"cosmetic":["subtotal(): double"]}]};
+const $ = s => document.querySelector(s);
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (k === 'class') e.className = v;
+    else if (k === 'style') e.style.cssText = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) { if (k == null || k === false) continue; e.append(k.nodeType ? k : document.createTextNode(k)); }
+  return e; // sempre textContent: strings do bytecode nunca viram HTML
+}
+const KL = D.meta.kinds, RL = D.meta.risks, LV = {alto: 'Alto', medio: 'Médio', nenhum: 'Nenhum'};
+const ST = {ADDED: ['+', 'Adicionada', 'added'], REMOVED: ['−', 'Removida', 'removed'], CHANGED: ['~', 'Alterada', 'changed'], COSMETIC: ['≈', 'Cosmética (ignorada)', 'cosmetic']};
+const COLOR = {alto: 'var(--risk-alto)', medio: 'var(--risk-medio)', nenhum: 'var(--risk-nenhum)'};
+const KCOLOR = {LOGIC: 'var(--changed)', CONDITION: 'var(--changed)', CALL: 'var(--accent)', METHOD_ADDED: 'var(--added)', METHOD_REMOVED: 'var(--removed)', COSMETIC: 'var(--cosmetic)'};
+const f = {risk: '', kind: '', q: ''};
+let sel = null;
+
+/* ---------- filtros ---------- */
+function members(c) {
+  const q = f.q.toLowerCase(), hit = !q || c.name.toLowerCase().includes(q);
+  return c.members.filter(m => (!f.risk || m.risk === f.risk) && (!f.kind || m.kinds.includes(f.kind)) && (hit || m.name.toLowerCase().includes(q)));
+}
+function visible(c) {
+  if (c.members.length) return members(c).length > 0;
+  return (!f.risk || f.risk === 'nenhum') && (!f.kind || f.kind === 'COSMETIC') && (!f.q || c.name.toLowerCase().includes(f.q.toLowerCase()));
+}
+
+/* ---------- resumo ---------- */
+function card(label, value, color, on, active) {
+  const inner = [h('b', null, String(value)), h('span', null, label)];
+  const p = {class: 'card' + (active ? ' on' : ''), style: '--c:' + color};
+  return on ? h('button', {...p, onclick: on}, inner) : h('div', p, inner);
+}
+function toggle(key, val) { f[key] = f[key] === val ? '' : val; sync(); render(); }
+function summary() {
+  const S = D.summary;
+  $('#s-classes').replaceChildren(
+    card('adicionadas', S.classes.added, 'var(--added)'), card('removidas', S.classes.removed, 'var(--removed)'),
+    card('alteradas', S.classes.changed, 'var(--changed)'), card('cosméticas (ignoradas)', S.classes.cosmetic, 'var(--cosmetic)'),
+    card('entradas alteradas no jar', S.entries.added + S.entries.removed + S.entries.changed, 'var(--accent)'));
+  $('#s-kinds').replaceChildren(...Object.keys(KL).map(k => card(KL[k], S.kinds[k], KCOLOR[k], () => toggle('kind', k), f.kind === k)));
+  $('#s-risk').replaceChildren(
+    ...['alto', 'medio', 'nenhum'].map(l => card('classes — risco ' + LV[l].toLowerCase(), S.risk[l], COLOR[l], () => toggle('risk', l), f.risk === l)),
+    ...Object.keys(RL).filter(k => S.riskTags[k]).map(k => card(RL[k], S.riskTags[k], 'var(--risk-' + (['REDE', 'EXEC', 'SERIALIZACAO'].includes(k) ? 'alto' : 'medio') + ')')));
+}
+
+/* ---------- mapa de calor ---------- */
+function heat(list) {
+  const max = Math.max(1, ...list.map(c => c.score));
+  $('#heat').replaceChildren(...[...list].sort((a, b) => b.score - a.score).map(c => {
+    const r = c.score / max, hue = Math.round(55 - 55 * r);
+    const bg = c.score ? `hsl(${hue} 80% var(--heat-l))` : 'var(--cosmetic-bg)';
+    return h('button', {class: 'tile' + (sel === c.name ? ' sel' : ''), style: '--bg-t:' + bg, onclick: () => { sel = c.name; render(); document.getElementById('detail').scrollIntoView({behavior: 'smooth', block: 'nearest'}); }},
+      h('b', null, c.name.split('/').pop()), h('small', null, c.score + ' linhas alteradas'));
+  }));
+  if (!list.length) $('#heat').replaceChildren(h('span', {class: 'muted'}, 'Nenhuma classe para os filtros atuais.'));
+}
+
+/* ---------- árvore ---------- */
+function build(list) {
+  const root = {kids: new Map(), cls: []};
+  for (const c of list) {
+    const parts = c.name.split('/'), leaf = parts.pop();
+    let n = root;
+    for (const p of parts) { if (!n.kids.has(p)) n.kids.set(p, {kids: new Map(), cls: []}); n = n.kids.get(p); }
+    n.cls.push([leaf, c]);
+  }
+  return root;
+}
+function nodeEl(n) {
+  const out = [];
+  for (const [name, k] of [...n.kids].sort((a, b) => a[0].localeCompare(b[0]))) out.push(h('details', {open: ''}, h('summary', null, name), nodeEl(k)));
+  for (const [leaf, c] of n.cls.sort((a, b) => a[0].localeCompare(b[0]))) {
+    const st = ST[c.status];
+    out.push(h('button', {class: 'node' + (sel === c.name ? ' sel' : ''), onclick: () => { sel = c.name; render(); }},
+      h('span', {class: 'ico ' + st[2], title: st[1]}, st[0]), leaf,
+      c.risk !== 'nenhum' && h('span', {class: 'dot', style: '--c:' + COLOR[c.risk], title: 'risco ' + LV[c.risk]}),
+      h('span', {class: 'n'}, c.members.length ? String(members(c).length) : '')));
+  }
+  return out;
+}
+function tree(list) {
+  const kids = [h('div', {class: 'leafs'}, nodeEl(build(list)))];
+  const res = D.entries.filter(e => !e.path.endsWith('.class'));
+  if (res.length && !f.risk && !f.kind && !f.q) {
+    kids.push(h('details', {open: ''}, h('summary', null, '(recursos)'), res.map(e =>
+      h('div', {class: 'node'}, h('span', {class: 'ico ' + ST[e.status][2], title: ST[e.status][1]}, ST[e.status][0]), e.path))));
+  }
+  $('#tree').replaceChildren(...kids);
+  if (!list.length) $('#tree').replaceChildren(h('span', {class: 'muted'}, 'Nada encontrado.'));
+}
+
+/* ---------- diff lado a lado ---------- */
+function rows(diff) {
+  const out = []; let i = 0;
+  while (i < diff.length) {
+    if (diff[i].op === ' ') { out.push([diff[i].text, diff[i].text, 'eq']); i++; continue; }
+    const L = [], R = [];
+    while (i < diff.length && diff[i].op !== ' ') { (diff[i].op === '-' ? L : R).push(diff[i].text); i++; }
+    for (let k = 0; k < Math.max(L.length, R.length); k++) out.push([L[k], R[k], 'chg']);
+  }
+  return out;
+}
+function sideBySide(diff) {
+  let a = 0, b = 0;
+  return h('div', {class: 'wrap'}, h('table', {class: 'diff'}, h('tbody', null, rows(diff).map(([l, r, t]) => {
+    const lc = t === 'eq' ? '' : l === undefined ? 'empty' : 'del', rc = t === 'eq' ? '' : r === undefined ? 'empty' : 'add';
+    return h('tr', null,
+      h('td', {class: 'ln'}, l === undefined ? '' : String(++a)), h('td', {class: 'code ' + lc}, l ?? ''),
+      h('td', {class: 'ln'}, r === undefined ? '' : String(++b)), h('td', {class: 'code ' + rc}, r ?? ''));
+  }))));
+}
+function detail(c) {
+  const box = $('#detail');
+  if (!c) { box.replaceChildren(h('div', {class: 'panel muted'}, 'Selecione uma classe na árvore ou no mapa de calor.')); return; }
+  const st = ST[c.status];
+  const head = h('div', {class: 'panel', style: 'margin-bottom:var(--s4);display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap'},
+    h('span', {class: 'ico ' + st[2]}, st[0]), h('b', {style: 'font-family:var(--mono)'}, c.name.replace(/\//g, '.')),
+    h('span', {class: 'badge'}, st[1]), c.risk !== 'nenhum' && h('span', {class: 'badge r-' + c.risk}, 'risco ' + LV[c.risk]),
+    h('span', {class: 'muted'}, c.score + ' linhas alteradas'));
+  const ms = members(c);
+  const body = c.status === 'COSMETIC'
+    ? h('div', {class: 'panel muted'}, 'O arquivo .class mudou (hash diferente), mas o bytecode normalizado é idêntico: só nomes de variáveis locais, números de linha ou ordem do constant pool. Ignorada.')
+    : ms.map(m => h('div', {class: 'member'},
+        h('header', null, h('code', null, m.name),
+          m.kinds.map(k => h('span', {class: 'badge k-' + k}, KL[k])),
+          m.risks.map(r => h('span', {class: 'badge r-' + (['REDE', 'EXEC', 'SERIALIZACAO'].includes(r) ? 'alto' : 'medio')}, 'risco: ' + RL[r]))),
+        sideBySide(m.diff)));
+  const cos = c.status !== 'COSMETIC' && c.cosmetic.length
+    ? h('div', {class: 'panel muted'}, h('span', {class: 'ico cosmetic'}, '≈'), ' Cosmética ignorada (variável local renomeada, sem efeito no bytecode): ', c.cosmetic.map(n => h('code', null, n + ' ')))
+    : null;
+  box.replaceChildren(head, body, cos);
+}
+
+/* ---------- render ---------- */
+function render() {
+  summary();
+  const list = D.classes.filter(visible);
+  if (!list.some(c => c.name === sel)) sel = list.length ? list[0].name : null;
+  heat(list); tree(list); detail(list.find(c => c.name === sel));
+  $('#count').textContent = `mostrando ${list.length} de ${D.classes.length} classes`;
+}
+function sync() { $('#q').value = f.q; $('#f-risk').value = f.risk; $('#f-kind').value = f.kind; }
+
+/* ---------- init ---------- */
+$('#jars').textContent = D.left + '  →  ' + D.right;
+$('#foot').textContent = 'gerado por jardiff em ' + D.generated;
+$('#f-kind').replaceChildren(h('option', {value: ''}, 'Tipo: todos'), ...Object.keys(KL).map(k => h('option', {value: k}, KL[k])));
+$('#q').addEventListener('input', e => { f.q = e.target.value; render(); });
+$('#f-risk').addEventListener('change', e => { f.risk = e.target.value; render(); });
+$('#f-kind').addEventListener('change', e => { f.kind = e.target.value; render(); });
+$('#clear').addEventListener('click', () => { f.risk = f.kind = f.q = ''; sync(); render(); });
+function theme(t) { document.documentElement.dataset.theme = t; $('#theme').textContent = t === 'dark' ? '☀' : '☾'; try { localStorage.setItem('jardiff-theme', t); } catch (e) {} }
+let saved = null; try { saved = localStorage.getItem('jardiff-theme'); } catch (e) {}
+theme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+$('#theme').addEventListener('click', () => { theme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); render(); });
+render();
+</script>
+</body>
+</html>

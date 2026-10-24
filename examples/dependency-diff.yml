@@ -1,0 +1,19 @@
+# Auditar uma dependência do Maven Central antes de atualizar (rode manualmente em "Actions").
+name: audit-dependency
+on:
+  workflow_dispatch:
+    inputs:
+      artifact: { description: "groupId:artifactId", default: "com.google.code.gson:gson" }
+      old: { description: "versão antiga", default: "2.10" }
+      new: { description: "versão nova", default: "2.11.0" }
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: SEU_USUARIO/jardiff@v1
+        with:
+          artifact: ${{ inputs.artifact }}
+          old-version: ${{ inputs.old }}
+          new-version: ${{ inputs.new }}
+          fail-on-risk: alto
+          comment: "false"

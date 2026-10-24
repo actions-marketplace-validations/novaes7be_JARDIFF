@@ -1,0 +1,596 @@
+{
+  "left": "v1.jar",
+  "right": "v2.jar",
+  "generated": "2026-10-23T22:59:07Z",
+  "summary": {
+    "classes": {
+      "added": 1,
+      "removed": 0,
+      "changed": 3,
+      "cosmetic": 0
+    },
+    "entries": {
+      "added": 1,
+      "removed": 0,
+      "changed": 3
+    },
+    "kinds": {
+      "LOGIC": 3,
+      "CALL": 2,
+      "CONDITION": 1,
+      "METHOD_ADDED": 0,
+      "METHOD_REMOVED": 1,
+      "COSMETIC": 1
+    },
+    "risk": {
+      "alto": 1,
+      "medio": 1,
+      "nenhum": 2
+    },
+    "riskTags": {
+      "REDE": 1,
+      "EXEC": 0,
+      "SERIALIZACAO": 0,
+      "REFLEXAO": 1,
+      "ARQUIVOS": 0
+    }
+  },
+  "meta": {
+    "kinds": {
+      "LOGIC": "lógica alterada",
+      "CALL": "chamada nova",
+      "CONDITION": "condição trocada",
+      "METHOD_ADDED": "método adicionado",
+      "METHOD_REMOVED": "método removido",
+      "COSMETIC": "cosmética (ignorada)"
+    },
+    "risks": {
+      "REDE": "rede",
+      "EXEC": "exec",
+      "SERIALIZACAO": "serialização",
+      "REFLEXAO": "reflexão",
+      "ARQUIVOS": "acesso a arquivos"
+    }
+  },
+  "entries": [
+    {
+      "path": "loja/Cupom.class",
+      "status": "ADDED"
+    },
+    {
+      "path": "loja/Desconto.class",
+      "status": "CHANGED"
+    },
+    {
+      "path": "loja/Frete.class",
+      "status": "CHANGED"
+    },
+    {
+      "path": "loja/Pedido.class",
+      "status": "CHANGED"
+    }
+  ],
+  "classes": [
+    {
+      "name": "loja/Cupom",
+      "status": "ADDED",
+      "score": 17,
+      "risk": "nenhum",
+      "risks": [],
+      "members": [
+        {
+          "name": "[classe]",
+          "kinds": [],
+          "risk": "nenhum",
+          "risks": [],
+          "diff": [
+            {
+              "op": "+",
+              "text": "access 0x0021"
+            },
+            {
+              "op": "+",
+              "text": "super java/lang/Object"
+            }
+          ]
+        },
+        {
+          "name": "<init>(): void",
+          "kinds": [],
+          "risk": "nenhum",
+          "risks": [],
+          "diff": [
+            {
+              "op": "+",
+              "text": "access 0x0001"
+            },
+            {
+              "op": "+",
+              "text": "ALOAD 0"
+            },
+            {
+              "op": "+",
+              "text": "INVOKESPECIAL java/lang/Object.<init>()V"
+            },
+            {
+              "op": "+",
+              "text": "RETURN"
+            }
+          ]
+        },
+        {
+          "name": "valido(java.lang.String): boolean",
+          "kinds": [],
+          "risk": "nenhum",
+          "risks": [],
+          "diff": [
+            {
+              "op": "+",
+              "text": "access 0x0009"
+            },
+            {
+              "op": "+",
+              "text": "ALOAD 0"
+            },
+            {
+              "op": "+",
+              "text": "IFNULL +7"
+            },
+            {
+              "op": "+",
+              "text": "ALOAD 0"
+            },
+            {
+              "op": "+",
+              "text": "LDC \"PROMO\""
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/lang/String.startsWith(Ljava/lang/String;)Z"
+            },
+            {
+              "op": "+",
+              "text": "IFEQ +3"
+            },
+            {
+              "op": "+",
+              "text": "ICONST_1"
+            },
+            {
+              "op": "+",
+              "text": "GOTO +2"
+            },
+            {
+              "op": "+",
+              "text": "ICONST_0"
+            },
+            {
+              "op": "+",
+              "text": "IRETURN"
+            }
+          ]
+        }
+      ],
+      "cosmetic": []
+    },
+    {
+      "name": "loja/Desconto",
+      "status": "CHANGED",
+      "score": 6,
+      "risk": "nenhum",
+      "risks": [],
+      "members": [
+        {
+          "name": "calcular(double): double",
+          "kinds": [
+            "LOGIC",
+            "CONDITION"
+          ],
+          "risk": "nenhum",
+          "risks": [],
+          "diff": [
+            {
+              "op": " ",
+              "text": "access 0x0009"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 0"
+            },
+            {
+              "op": "-",
+              "text": "LDC 100.0"
+            },
+            {
+              "op": "+",
+              "text": "LDC 200.0"
+            },
+            {
+              "op": " ",
+              "text": "DCMPL"
+            },
+            {
+              "op": "-",
+              "text": "IFLE +5"
+            },
+            {
+              "op": "+",
+              "text": "IFLT +5"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 0"
+            },
+            {
+              "op": "-",
+              "text": "LDC 0.1"
+            },
+            {
+              "op": "+",
+              "text": "LDC 0.15"
+            },
+            {
+              "op": " ",
+              "text": "DMUL"
+            },
+            {
+              "op": " ",
+              "text": "DRETURN"
+            },
+            {
+              "op": " ",
+              "text": "DCONST_0"
+            },
+            {
+              "op": " ",
+              "text": "DRETURN"
+            }
+          ]
+        }
+      ],
+      "cosmetic": []
+    },
+    {
+      "name": "loja/Frete",
+      "status": "CHANGED",
+      "score": 16,
+      "risk": "alto",
+      "risks": [
+        "REDE"
+      ],
+      "members": [
+        {
+          "name": "calcular(double): double",
+          "kinds": [
+            "LOGIC",
+            "CALL"
+          ],
+          "risk": "alto",
+          "risks": [
+            "REDE"
+          ],
+          "diff": [
+            {
+              "op": " ",
+              "text": "access 0x0009"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 0"
+            },
+            {
+              "op": " ",
+              "text": "LDC 300.0"
+            },
+            {
+              "op": " ",
+              "text": "DCMPL"
+            },
+            {
+              "op": " ",
+              "text": "IFLE +3"
+            },
+            {
+              "op": " ",
+              "text": "DCONST_0"
+            },
+            {
+              "op": " ",
+              "text": "DRETURN"
+            },
+            {
+              "op": "+",
+              "text": "NEW java/net/URL"
+            },
+            {
+              "op": "+",
+              "text": "DUP"
+            },
+            {
+              "op": "+",
+              "text": "LDC \"https://api.exemplo.com/frete\""
+            },
+            {
+              "op": "+",
+              "text": "INVOKESPECIAL java/net/URL.<init>(Ljava/lang/String;)V"
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/net/URL.openConnection()Ljava/net/URLConnection;"
+            },
+            {
+              "op": "+",
+              "text": "CHECKCAST java/net/HttpURLConnection"
+            },
+            {
+              "op": "+",
+              "text": "ASTORE 2"
+            },
+            {
+              "op": "+",
+              "text": "ALOAD 2"
+            },
+            {
+              "op": "+",
+              "text": "LDC \"GET\""
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/net/HttpURLConnection.setRequestMethod(Ljava/lang/String;)V"
+            },
+            {
+              "op": "+",
+              "text": "ALOAD 2"
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/net/HttpURLConnection.getResponseCode()I"
+            },
+            {
+              "op": "+",
+              "text": "POP"
+            },
+            {
+              "op": "+",
+              "text": "GOTO +2"
+            },
+            {
+              "op": "+",
+              "text": "ASTORE 2"
+            },
+            {
+              "op": " ",
+              "text": "LDC 25.0"
+            },
+            {
+              "op": " ",
+              "text": "DRETURN"
+            },
+            {
+              "op": "+",
+              "text": "TRYCATCH java/lang/Exception 6..19 -> 20"
+            }
+          ]
+        }
+      ],
+      "cosmetic": []
+    },
+    {
+      "name": "loja/Pedido",
+      "status": "CHANGED",
+      "score": 34,
+      "risk": "medio",
+      "risks": [
+        "REFLEXAO"
+      ],
+      "members": [
+        {
+          "name": "total(): double",
+          "kinds": [
+            "LOGIC",
+            "CALL"
+          ],
+          "risk": "medio",
+          "risks": [
+            "REFLEXAO"
+          ],
+          "diff": [
+            {
+              "op": " ",
+              "text": "access 0x0001"
+            },
+            {
+              "op": " ",
+              "text": "ALOAD 0"
+            },
+            {
+              "op": " ",
+              "text": "INVOKEVIRTUAL loja/Pedido.subtotal()D"
+            },
+            {
+              "op": " ",
+              "text": "DSTORE 1"
+            },
+            {
+              "op": "+",
+              "text": "LDC \"loja.Desconto\""
+            },
+            {
+              "op": "+",
+              "text": "INVOKESTATIC java/lang/Class.forName(Ljava/lang/String;)Ljava/lang/Class;"
+            },
+            {
+              "op": "+",
+              "text": "LDC \"calcular\""
+            },
+            {
+              "op": "+",
+              "text": "ICONST_1"
+            },
+            {
+              "op": "+",
+              "text": "ANEWARRAY java/lang/Class"
+            },
+            {
+              "op": "+",
+              "text": "DUP"
+            },
+            {
+              "op": "+",
+              "text": "ICONST_0"
+            },
+            {
+              "op": "+",
+              "text": "GETSTATIC java/lang/Double.TYPE:Ljava/lang/Class;"
+            },
+            {
+              "op": "+",
+              "text": "AASTORE"
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/lang/Class.getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;"
+            },
+            {
+              "op": "+",
+              "text": "ACONST_NULL"
+            },
+            {
+              "op": "+",
+              "text": "ICONST_1"
+            },
+            {
+              "op": "+",
+              "text": "ANEWARRAY java/lang/Object"
+            },
+            {
+              "op": "+",
+              "text": "DUP"
+            },
+            {
+              "op": "+",
+              "text": "ICONST_0"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 1"
+            },
+            {
+              "op": "+",
+              "text": "INVOKESTATIC java/lang/Double.valueOf(D)Ljava/lang/Double;"
+            },
+            {
+              "op": "+",
+              "text": "AASTORE"
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/lang/reflect/Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;"
+            },
+            {
+              "op": "+",
+              "text": "CHECKCAST java/lang/Double"
+            },
+            {
+              "op": "+",
+              "text": "INVOKEVIRTUAL java/lang/Double.doubleValue()D"
+            },
+            {
+              "op": "+",
+              "text": "DSTORE 3"
+            },
+            {
+              "op": "+",
+              "text": "GOTO +4"
+            },
+            {
+              "op": "+",
+              "text": "ASTORE 5"
+            },
+            {
+              "op": "+",
+              "text": "DCONST_0"
+            },
+            {
+              "op": "+",
+              "text": "DSTORE 3"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 1"
+            },
+            {
+              "op": "-",
+              "text": "INVOKESTATIC loja/Desconto.calcular(D)D"
+            },
+            {
+              "op": "+",
+              "text": "DLOAD 3"
+            },
+            {
+              "op": " ",
+              "text": "DSUB"
+            },
+            {
+              "op": " ",
+              "text": "DLOAD 1"
+            },
+            {
+              "op": " ",
+              "text": "INVOKESTATIC loja/Frete.calcular(D)D"
+            },
+            {
+              "op": " ",
+              "text": "DADD"
+            },
+            {
+              "op": " ",
+              "text": "DRETURN"
+            },
+            {
+              "op": "+",
+              "text": "TRYCATCH java/lang/Exception 3..25 -> 26"
+            }
+          ]
+        },
+        {
+          "name": "resumo(): java.lang.String",
+          "kinds": [
+            "METHOD_REMOVED"
+          ],
+          "risk": "nenhum",
+          "risks": [],
+          "diff": [
+            {
+              "op": "-",
+              "text": "access 0x0001"
+            },
+            {
+              "op": "-",
+              "text": "ALOAD 0"
+            },
+            {
+              "op": "-",
+              "text": "GETFIELD loja/Pedido.itens:Ljava/util/List;"
+            },
+            {
+              "op": "-",
+              "text": "INVOKEINTERFACE java/util/List.size()I"
+            },
+            {
+              "op": "-",
+              "text": "INVOKEDYNAMIC makeConcatWithConstants(I)Ljava/lang/String; bsm=java/lang/invoke/StringConcatFactory.makeConcatWithConstants args=[Pedido com \u0001 itens]"
+            },
+            {
+              "op": "-",
+              "text": "ARETURN"
+            }
+          ]
+        }
+      ],
+      "cosmetic": [
+        "subtotal(): double"
+      ]
+    }
+  ]
+}

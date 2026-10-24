@@ -1,0 +1,108 @@
+name: jardiff
+description: Mostra o que mudou no comportamento (bytecode) entre duas versões de um .jar e falha o build se surgir risco novo.
+author: jardiff
+branding:
+  icon: shield
+  color: orange
+
+inputs:
+  old-jar:
+    description: Caminho do .jar antigo (alternativa a artifact).
+    required: false
+  new-jar:
+    description: Caminho do .jar novo.
+    required: false
+  artifact:
+    description: "Coordenada groupId:artifactId no Maven Central (usa old-version e new-version)."
+    required: false
+  old-version:
+    description: Versão antiga (modo artifact).
+    required: false
+  new-version:
+    description: Versão nova (modo artifact).
+    required: false
+  fail-on-risk:
+    description: "Falha o job se o risco novo atingir este nível: alto, medio ou nenhum (nunca falha)."
+    default: alto
+  comment:
+    description: Comenta o resumo no pull request (precisa de pull-requests - write).
+    default: "true"
+  github-token:
+    description: Token para comentar no PR.
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Compilar jardiff
+      shell: bash
+      run: mvn -q -B -f "${{ github.action_path }}/pom.xml" package -DskipTests
+
+    - name: Obter os jars
+      id: jars
+      shell: bash
+      env:
+        OLD_JAR: ${{ inputs.old-jar }}
+        NEW_JAR: ${{ inputs.new-jar }}
+        ARTIFACT: ${{ inputs.artifact }}
+        OLD_V: ${{ inputs.old-version }}
+        NEW_V: ${{ inputs.new-version }}
+      run: |
+        set -e
+        mkdir -p jardiff-report
+        if [ -n "$ARTIFACT" ]; then
+          [ -n "$OLD_V" ] && [ -n "$NEW_V" ] || { echo "::error::informe old-version e new-version"; exit 1; }
+          g="${ARTIFACT%%:*}"; a="${ARTIFACT##*:}"; path="${g//.//}/$a"
+          for v in "$OLD_V" "$NEW_V"; do
+            curl -fsSL -o "jardiff-report/$a-$v.jar" "https://repo1.maven.org/maven2/$path/$v/$a-$v.jar"
+          done
+          echo "old=jardiff-report/$a-$OLD_V.jar" >> "$GITHUB_OUTPUT"
+          echo "new=jardiff-report/$a-$NEW_V.jar" >> "$GITHUB_OUTPUT"
+        else
+          [ -n "$OLD_JAR" ] && [ -n "$NEW_JAR" ] || { echo "::error::informe old-jar e new-jar (ou artifact)"; exit 1; }
+          echo "old=$OLD_JAR" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW_JAR" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Rodar jardiff
+      id: run
+      shell: bash
+      env:
+        OLD: ${{ steps.jars.outputs.old }}
+        NEW: ${{ steps.jars.outputs.new }}
+        FAIL_ON: ${{ inputs.fail-on-risk }}
+      run: |
+        set +e
+        java -jar "${{ github.action_path }}/target/jardiff.jar" "$OLD" "$NEW" \
+          -o jardiff-report/relatorio.html --markdown jardiff-report/resumo.md --fail-on-risk "$FAIL_ON"
+        echo "code=$?" >> "$GITHUB_OUTPUT"
+        cat jardiff-report/resumo.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: jardiff-report
+        path: jardiff-report/*.html
+        if-no-files-found: ignore
+
+    - name: Comentar no PR
+      if: inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        gh pr comment "$PR" --edit-last --create-if-none --body-file jardiff-report/resumo.md \
+          || gh pr comment "$PR" --body-file jardiff-report/resumo.md \
+          || echo "::warning::não foi possível comentar no PR (sem permissão?)"
+
+    - name: Aplicar limite de risco
+      if: steps.run.outputs.code != '0'
+      shell: bash
+      run: |
+        echo "::error::jardiff terminou com código ${{ steps.run.outputs.code }} (3 = risco novo acima do limite)"
+        exit ${{ steps.run.outputs.code }}

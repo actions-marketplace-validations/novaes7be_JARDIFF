@@ -1,0 +1,8 @@
+target/
+.idea/
+*.iml
+out/
+samples/out/
+relatorio.html
+relatorio.json
+.DS_Store

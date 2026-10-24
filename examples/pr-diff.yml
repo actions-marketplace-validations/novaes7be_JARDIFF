@@ -1,0 +1,23 @@
+# Copie para .github/workflows/ do SEU projeto (troque SEU_USUARIO/jardiff@v1 e o nome do jar).
+# Compara o jar da branch base com o do PR e comenta o resultado.
+name: jardiff
+on: pull_request
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: "${{ github.base_ref }}", path: base }
+      - uses: actions/checkout@v4
+        with: { path: head }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: mvn -q -B -f base/pom.xml package -DskipTests && mvn -q -B -f head/pom.xml package -DskipTests
+      - uses: SEU_USUARIO/jardiff@v1
+        with:
+          old-jar: base/target/app.jar
+          new-jar: head/target/app.jar
+          fail-on-risk: alto

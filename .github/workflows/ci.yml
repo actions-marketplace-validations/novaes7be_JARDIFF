@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: mvn -B verify
+      - name: Testa a própria Action nos jars de exemplo
+        uses: ./
+        with:
+          old-jar: samples/v1.jar
+          new-jar: samples/v2.jar
+          fail-on-risk: nenhum
+          comment: "false"

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import org.objectweb.asm.util.Printer;
@@ -39,12 +40,20 @@ final class Normalizer {
             out.put("[campo] " + f.name + ": " + Type.getType(f.desc).getClassName(),
                     List.of("access " + hex(f.access), "valor " + f.value));
         }
+        boolean isEnum = (cn.access & Opcodes.ACC_ENUM) != 0;
         for (MethodNode m : cn.methods) {
+            if (generated(m, isEnum)) continue;
             out.put(display(m), body(m));
             locals.put(display(m), m.localVariables == null ? "" : m.localVariables.stream()
                     .map(v -> v.index + "=" + v.name).sorted().collect(Collectors.joining(",")));
         }
         return new Parsed(out, locals);
+    }
+
+    /** Ruído do compilador (muda com a versão do javac, não por decisão do autor). */
+    private static boolean generated(MethodNode m, boolean isEnum) {
+        return m.name.equals("$values") || m.name.startsWith("access$") || m.name.equals("$deserializeLambda$")
+                || (m.access & Opcodes.ACC_BRIDGE) != 0 || (isEnum && m.name.equals("<clinit>"));
     }
 
     private static String display(MethodNode m) {

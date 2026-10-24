@@ -10,7 +10,7 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: SEU_USUARIO/jardiff@v1
+      - uses: novaes7be/jardiff@v1
         with:
           artifact: ${{ inputs.artifact }}
           old-version: ${{ inputs.old }}

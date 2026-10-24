@@ -93,4 +93,11 @@ class JarDiffTest {
         String text = Files.readString(md);
         assertTrue(text.contains("loja.Frete") && text.contains("rede") && text.contains("alto"));
     }
+
+    @Test void ignoraRuidoDoCompilador() throws Exception {
+        Path jar = TestJars.fromSource(tmp, "en", "Cor", "public enum Cor { RED, GREEN }");
+        var members = Normalizer.parse(JarIndex.read(jar).classes().get("Cor.class")).members();
+        assertTrue(members.keySet().stream().noneMatch(k -> k.startsWith("$values") || k.startsWith("<clinit>")));
+        assertTrue(members.keySet().stream().anyMatch(k -> k.startsWith("[campo] RED")), "constantes continuam comparadas");
+    }
 }

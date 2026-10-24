@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17" }
       - run: mvn -q -B -f base/pom.xml package -DskipTests && mvn -q -B -f head/pom.xml package -DskipTests
-      - uses: SEU_USUARIO/jardiff@v1
+      - uses: novaes7be/jardiff@v1
         with:
           old-jar: base/target/app.jar
           new-jar: head/target/app.jar

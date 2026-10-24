@@ -1,6 +1,6 @@
-name: jardiff
+name: jardiff-bytecode-diff
 description: Mostra o que mudou no comportamento (bytecode) entre duas versões de um .jar e falha o build se surgir risco novo.
-author: jardiff
+author: Bernardo Nóbrega Novaes @novaes.zxz
 branding:
   icon: shield
   color: orange
